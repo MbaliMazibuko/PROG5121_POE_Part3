@@ -6,16 +6,14 @@ package com.mycompany.quikchatapp;
 
 import java.util.Scanner;
 
-/**
- *
- * @author user
- */
 public class QuikChatApp {
-    
+
+    private static MessageStore store = new MessageStore();
+
     private static final String[] MENU_OPTIONS = {
-            "1. Register a new account",
-            "2. Login",
-            "3. Exit"
+        "1. Register a new account",
+        "2. Login",
+        "3. Exit"
     };
 
     public static void main(String[] args) {
@@ -53,8 +51,8 @@ public class QuikChatApp {
 
     private static void printBanner() {
         System.out.println("========================================");
-        System.out.println("          QUICKCHAT - PART 1");
-        System.out.println("     Registration and Login Feature");
+        System.out.println("          QUICKCHAT");
+        System.out.println("  Registration, Login and Messaging");
         System.out.println("========================================");
         System.out.println();
     }
@@ -68,7 +66,8 @@ public class QuikChatApp {
     private static void registerFlow(Scanner input, Login login) {
         System.out.println();
         System.out.println("--- Create an account ---");
-System.out.print("Enter first name: ");
+
+        System.out.print("Enter first name: ");
         String firstName = input.nextLine().trim();
         while (firstName.equals("")) {
             System.out.print("First name cannot be empty. Enter first name: ");
@@ -81,32 +80,41 @@ System.out.print("Enter first name: ");
             System.out.print("Last name cannot be empty. Enter last name: ");
             lastName = input.nextLine().trim();
         }
+
         login.setFirstName(firstName);
         login.setLastName(lastName);
 
-        String username = captureUntilValid(
-                input,
-                "Enter username (must contain '_' and be no more than 5 characters): ",
-                login::checkUserName,
-                login::getUsernameMessage
-        );
+        String username;
+        while (true) {
+            System.out.print("Enter username (must contain '_' and be no more than 5 characters): ");
+            username = input.nextLine().trim();
+            System.out.println(login.getUsernameMessage(username));
+            if (login.checkUserName(username)) {
+                break;
+            }
+        }
 
-        String password = captureUntilValid(//Password must have 8 character,a capital letter, a number and special character.
-                input,
-                "Enter password (min 8 chars, 1 capital, 1 number, 1 special character): ",
-                login::checkPasswordComplexity,
-                login::getPasswordMessage
-        );
+        String password;
+        while (true) {
+            System.out.print("Enter password (min 8 chars, 1 capital, 1 number, 1 special character): ");
+            password = input.nextLine().trim();
+            System.out.println(login.getPasswordMessage(password));
+            if (login.checkPasswordComplexity(password)) {
+                break;
+            }
+        }
 
-        String cell = captureUntilValid(//Cell number must start with +27 and be 12 characters long.
-                input,
-                "Enter South African cell number (example +27838968976): ",
-                login::checkCellPhoneNumber,
-                login::getCellPhoneMessage
-        );
+        String cell;
+        while (true) {
+            System.out.print("Enter South African cell number (example +27838968976): ");
+            cell = input.nextLine().trim();
+            System.out.println(login.getCellPhoneMessage(cell));
+            if (login.checkCellPhoneNumber(cell)) {
+                break;
+            }
+        }
 
-        String result = login.registerUser(username, password, cell);
-        System.out.println(result);
+        System.out.println(login.registerUser(username, password, cell));
     }
 
     private static void loginFlow(Scanner input, Login login) {
@@ -127,36 +135,9 @@ System.out.print("Enter first name: ");
         System.out.println(login.returnLoginStatus(username, password));
 
         if (success) {
-            System.out.println("Login successful: " + login.getFullName());
-            if (success) {
-            quickChatMenu(input,login);
-        }
+            quickChatMenu(input, login);
         }
     }
-
-    private static String captureUntilValid(Scanner input,
-                                            String prompt,
-                                            java.util.function.Predicate<String> checker,
-                                            java.util.function.Function<String, String> messenger) {
-        String value;
-        while (true) {
-            System.out.print(prompt);
-            value = input.nextLine().trim();
-            System.out.println(messenger.apply(value));
-            if (checker.test(value)) {
-                return value;
-            }
-        }
-    }
-
-    private static void quickChatMenu(Scanner input) {
-        
-        System.out.println("========================================");
-        System.out.println("          Welcome to QuickChat.");
-        System.out.println("========================================");
-        boolean inChat = true;
-    }
-        private static MessageStore store = new MessageStore();
 
     private static void quickChatMenu(Scanner input, Login login) {
         System.out.println("Welcome to QuickChat.");
@@ -189,7 +170,6 @@ System.out.print("Enter first name: ");
     private static void sendMessages(Scanner input, Login login) {
         System.out.print("How many messages do you want to send? ");
         int limit = Integer.parseInt(input.nextLine().trim());
-        Message tracker = new Message();
 
         for (int i = 0; i < limit; i++) {
             System.out.println();
@@ -226,6 +206,10 @@ System.out.print("Enter first name: ");
             if (action == 1) {
                 store.addSent(current.getMessageText());
                 store.addHashAndID(current.getMessageHash(), current.getMessageID());
+                System.out.println("Message ID: " + current.getMessageID());
+                System.out.println("Message Hash: " + current.getMessageHash());
+                System.out.println("Recipient: " + current.getRecipient());
+                System.out.println("Message: " + current.getMessageText());
             } else if (action == 2) {
                 store.addDisregarded(current.getMessageText());
             } else if (action == 3) {
@@ -239,11 +223,51 @@ System.out.print("Enter first name: ");
             }
         }
 
-        System.out.println("Total messages sent: " + tracker.returnTotalMessagess());}
-    
+        Message tracker = new Message();
+        System.out.println("Total messages sent: " + tracker.returnTotalMessagess());
+    }
+
+    private static void storedMenu(Scanner input, Login login) {
+        boolean inStore = true;
+
+        while (inStore) {
+            System.out.println();
+            System.out.println("--- Stored Messages ---");
+            System.out.println("a) Display sender and recipient");
+            System.out.println("b) Display longest stored message");
+            System.out.println("c) Search by message ID");
+            System.out.println("d) Search by recipient");
+            System.out.println("e) Delete by message hash");
+            System.out.println("f) Display full report");
+            System.out.println("g) Back");
+            System.out.print("Select an option: ");
+            String choice = input.nextLine().trim();
+
+            if (choice.equals("a")) {
+                System.out.println(store.displaySenderAndRecipient());
+            } else if (choice.equals("b")) {
+                System.out.println(store.displayLongestMessage());
+            } else if (choice.equals("c")) {
+                System.out.print("Enter message ID: ");
+                System.out.println(store.searchByMessageID(input.nextLine().trim()));
+            } else if (choice.equals("d")) {
+                System.out.print("Enter recipient: ");
+                System.out.println(store.searchByRecipient(input.nextLine().trim()));
+            } else if (choice.equals("e")) {
+                System.out.print("Enter message hash: ");
+                String result = store.deleteByHash(input.nextLine().trim());
+                System.out.println(result);
+                store.rewriteJSON();
+            } else if (choice.equals("f")) {
+                System.out.println(store.displayReport());
+            } else if (choice.equals("g")) {
+                inStore = false;
+            } else {
+                System.out.println("Invalid option.");
+            }
         }
-
-
+    }
+}
    
 
 
