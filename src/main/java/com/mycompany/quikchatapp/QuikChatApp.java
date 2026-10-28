@@ -155,28 +155,38 @@ System.out.print("Enter first name: ");
         System.out.println("          Welcome to QuickChat.");
         System.out.println("========================================");
         boolean inChat = true;
+    }
+        private static MessageStore store = new MessageStore();
+
+    private static void quickChatMenu(Scanner input, Login login) {
+        System.out.println("Welcome to QuickChat.");
+        store.loadStoredFromJSON();
+        boolean inChat = true;
 
         while (inChat) {
             System.out.println();
             System.out.println("1) Send Messages");
             System.out.println("2) Show recently sent messages");
             System.out.println("3) Quit");
+            System.out.println("4) Stored Messages");
             System.out.print("Select an option: ");
             String choice = input.nextLine().trim();
 
             if (choice.equals("1")) {
-                sendMessages(input);
+                sendMessages(input, login);
             } else if (choice.equals("2")) {
                 System.out.println("Coming Soon.");
             } else if (choice.equals("3")) {
                 inChat = false;
+            } else if (choice.equals("4")) {
+                storedMenu(input, login);
             } else {
-                System.out.println("Invalid option. Please enter 1, 2 or 3.");
+                System.out.println("Invalid option.");
             }
         }
     }
 
-    private static void sendMessages(Scanner input) {
+    private static void sendMessages(Scanner input, Login login) {
         System.out.print("How many messages do you want to send? ");
         int limit = Integer.parseInt(input.nextLine().trim());
         Message tracker = new Message();
