@@ -129,7 +129,7 @@ System.out.print("Enter first name: ");
         if (success) {
             System.out.println("Login successful: " + login.getFullName());
             if (success) {
-            quickChatMenu(input);
+            quickChatMenu(input,login);
         }
         }
     }
@@ -224,11 +224,18 @@ System.out.print("Enter first name: ");
             System.out.println(current.SentMessage(action));
 
             if (action == 1) {
-                System.out.println("Message ID: " + current.getMessageID());
-                System.out.println("Message Hash: " + current.getMessageHash());
-                System.out.println("Recipient: " + current.getRecipient());
-                System.out.println("Message: " + current.getMessageText());
-                System.out.println(current.SentMessage(action));
+                store.addSent(current.getMessageText());
+                store.addHashAndID(current.getMessageHash(), current.getMessageID());
+            } else if (action == 2) {
+                store.addDisregarded(current.getMessageText());
+            } else if (action == 3) {
+                store.addStored(
+                        login.getFirstName() + " " + login.getLastName(),
+                        current.getRecipient(),
+                        current.getMessageText(),
+                        current.getMessageHash(),
+                        current.getMessageID()
+                );
             }
         }
 
