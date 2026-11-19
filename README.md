@@ -33,7 +33,7 @@ Classes:
 - MessageStore
 - MessageStoreTest
 
-Git branch: Part3Reports
+Git branch: Part3Report
 
 ---
 
