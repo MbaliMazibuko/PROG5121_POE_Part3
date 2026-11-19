@@ -12,6 +12,10 @@ import java.util.Random;
  *
  * @author user
  */
+/**
+ * Message class for QuickChat Part 2.
+ * Handles message ID, recipient, length check, hash, send/store/disregard.
+ */
 public class Message {
 
     private String messageID;
@@ -144,7 +148,14 @@ public class Message {
     public int returnTotalMessagess() {
         return totalMessagesSent;
     }
-
+   /**
+     * Stores the message in a JSON file.
+     * Research reference:
+     * Oracle Java Tutorials - Reading and Writing Files
+     * https://docs.oracle.com/javase/tutorial/essential/io/file.html
+     * JSON format structure researched from:
+     * https://www.json.org/json-en.html
+     */
     public void storeMessage() {
         try {
             FileWriter writer = new FileWriter("stored_messages.json", true);
